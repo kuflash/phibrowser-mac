@@ -300,6 +300,8 @@ extension AppController {
     static let uninstallPhiItemTag = 500026
     static let browserMigrationItemTag = 500038
     static let fileSaveForLaterLibraryItemTag = 500039
+    static let fileWatchPageItemTag = 500041
+    static let fileImportFolioItemTag = 500042
     static let viewLibraryItemTag = 500040
     static let debugMenuItemTag = 500027
     static let spacesProfileSeparatorTag = 500020
@@ -889,7 +891,9 @@ extension AppController {
                 || item.action == #selector(AppController.copyFullPageScreenshotFromMenu(_:))
                 || item.action == #selector(AppController.capturePageAreaFromMenu(_:))
                 || item.tag == CommandWrapper.PHI_SAVE_FOR_LATER.rawValue
+                || item.tag == AppController.fileWatchPageItemTag
                 || item.tag == AppController.fileSaveForLaterLibraryItemTag
+                || item.tag == AppController.fileImportFolioItemTag
         }
 
         let newKioskWindowItem = NSMenuItem(
@@ -992,6 +996,34 @@ extension AppController {
         Shortcuts.updateShortcut(for: saveForLaterItem)
         saveForLaterItem.target = target
 
+        // Watch This Page is a service capture (the Folio service re-checks
+        // the page on its sweep), so it is enabled only while the service
+        // is reachable; validation decides per menu open.
+        let watchItem = NSMenuItem(
+            title: NSLocalizedString(
+                "app.fileMenu.watchPage",
+                value: "Watch This Page",
+                comment: "File menu - Saves the current page into Folio as a watched page that is re-checked for changes"
+            ),
+            action: #selector(AppController.watchTabInFolio(_:)),
+            keyEquivalent: "w"
+        )
+        watchItem.keyEquivalentModifierMask = [.command, .option]
+        watchItem.tag = AppController.fileWatchPageItemTag
+        watchItem.target = target
+
+        let importItem = NSMenuItem(
+            title: NSLocalizedString(
+                "app.fileMenu.importIntoFolio",
+                value: "Import into Folio…",
+                comment: "File menu - Opens a file picker to import PDFs, EPUBs, reading-list exports or OPML files into Folio"
+            ),
+            action: #selector(AppController.importIntoFolio(_:)),
+            keyEquivalent: ""
+        )
+        importItem.tag = AppController.fileImportFolioItemTag
+        importItem.target = target
+
         let libraryItem = NSMenuItem(
             title: NSLocalizedString(
                 "app.fileMenu.openFolio",
@@ -1011,8 +1043,10 @@ extension AppController {
         })
         if let savePageIndex {
             subMenu.insertItem(saveForLaterItem, at: savePageIndex + 1)
+            subMenu.insertItem(watchItem, at: savePageIndex + 2)
         } else {
             subMenu.addItem(saveForLaterItem)
+            subMenu.addItem(watchItem)
         }
 
         // The library opens a place rather than saving one: it lives right
@@ -1022,8 +1056,10 @@ extension AppController {
         }).map { $0 + 1 }
         if let openLocationIndex {
             subMenu.insertItem(libraryItem, at: openLocationIndex)
+            subMenu.insertItem(importItem, at: openLocationIndex + 1)
         } else {
             subMenu.addItem(libraryItem)
+            subMenu.addItem(importItem)
         }
     }
 
@@ -1300,6 +1336,20 @@ extension AppController {
     @MainActor
     @objc func openSaveForLaterLibrary(_ sender: Any?) {
         SaveForLaterService.openLibrary()
+    }
+
+    @MainActor
+    @objc func watchTabInFolio(_ sender: Any?) {
+        guard let state = SpaceSessionControllersManager.shared.activeWindowController?.browserState,
+              let tab = state.pageCommandTarget else {
+            return
+        }
+        SaveForLaterService.watch(tab: tab, in: state)
+    }
+
+    @MainActor
+    @objc func importIntoFolio(_ sender: Any?) {
+        SaveForLaterService.importIntoFolio()
     }
 
     @MainActor
@@ -3259,6 +3309,20 @@ extension AppController {
 
         if item.action == #selector(openSaveForLaterLibrary(_:)) {
             return SaveForLaterService.featureEnabled
+                && ApplicationState.shared.canUseBrowser
+        }
+
+        if item.action == #selector(watchTabInFolio(_:)) {
+            let canWatch = MainActor.assumeIsolated {
+                SaveForLaterService.canWatch(
+                    SpaceSessionControllersManager.shared
+                        .activeWindowController?.browserState.pageCommandTarget)
+            }
+            return canWatch && ApplicationState.shared.canUseBrowser
+        }
+
+        if item.action == #selector(importIntoFolio(_:)) {
+            return MainActor.assumeIsolated { SaveForLaterService.canImport }
                 && ApplicationState.shared.canUseBrowser
         }
 

@@ -66,7 +66,7 @@ enum SaveForLaterService {
     /// Tabs with a save in flight, by Chromium tab id. Guards double
     /// triggers the way `ReaderExtensionBridge.pendingExtractions` guards
     /// its RPCs: job bookkeeping, not a state container.
-    private static var inFlightTabGuids: Set<Int> = []
+    static var inFlightTabGuids: Set<Int> = []
 
     /// Whether the menu item / shortcut should be offered for this tab.
     /// Guest Mode saves too, into the same folder as a signed-in session.
@@ -121,8 +121,17 @@ enum SaveForLaterService {
             highlightBlocks: highlightBlocks)
         inFlightTabGuids.insert(context.tabGuid)
         pinFolder(forTab: context.tabGuid, profileId: context.profileId)
+        // The Folio service (phi-agent, hosted by the Sentinel) captures
+        // over CDP when it is reachable; the extension path below is the
+        // legacy pipeline, kept for one release for a signed-out session
+        // and for a Sentinel that is not up. See `SaveForLaterService+Service.swift`.
+        let throughService = serviceAvailable
         Task {
-            await run(tab: tab, context: context)
+            if throughService {
+                await captureThroughService(context: context)
+            } else {
+                await run(tab: tab, context: context)
+            }
             inFlightTabGuids.remove(context.tabGuid)
         }
     }
@@ -131,7 +140,7 @@ enum SaveForLaterService {
 
     /// Everything the job needs from the tab, captured at trigger time so
     /// the rest of the job is indifferent to the tab's fate.
-    private struct JobContext {
+    struct JobContext {
         let tabGuid: Int
         let windowId: Int
         let profileId: String
@@ -159,8 +168,7 @@ enum SaveForLaterService {
         }
         AppLogWarn("[SaveForLater] no extension answered the save request")
         showToast(title: failedToastTitle,
-                  message: URL(fileURLWithPath: PhiPreferences.SaveForLater
-                      .effectiveFolderPath(forProfile: context.profileId))
+                  message: URL(fileURLWithPath: PhiPreferences.SaveForLater.globalFolderPath)
                       .lastPathComponent,
                   windowId: context.windowId)
     }
@@ -282,7 +290,7 @@ enum SaveForLaterService {
     /// The extension speaks in Chromium tab ids (`Tab.guid`); the tab can be
     /// in any window. The library page the Library hosts is a tab of its
     /// window too, off the strip, and its broker calls name it.
-    private static func findTab(_ tabId: Int) -> (tab: Tab, state: BrowserState)? {
+    static func findTab(_ tabId: Int) -> (tab: Tab, state: BrowserState)? {
         for controller in SpaceSessionControllersManager.shared.getAllWindows() {
             let state = controller.browserState
             if let tab = state.tabs.first(where: { $0.guid == tabId }) {
@@ -301,6 +309,7 @@ enum SaveForLaterService {
     /// toast is; the write goes back to Mirage, so the extension stays the
     /// only writer of a saved item.
     private static func addNoteToastAction(basename: String, block: String,
+                                           location: String? = nil,
                                            windowId: Int,
                                            tabId: Int?) -> OverlayToastAction {
         OverlayToastAction(
@@ -324,6 +333,9 @@ enum SaveForLaterService {
                         "block": block,
                         "note": "**\(label):** " + note,
                     ]
+                    // The service keeps items in locations; the worker's
+                    // `POST /notes` needs the one the highlight landed in.
+                    if let location { payload["location"] = location }
                     if let tabId { payload["tabId"] = tabId }
                     guard let data = try? JSONSerialization.data(withJSONObject: payload),
                           let json = String(data: data, encoding: .utf8) else { return }
@@ -477,9 +489,11 @@ enum SaveForLaterService {
         pinnedJobFolders[tabGuid] = (folderURL(forProfile: profileId), now)
     }
 
+    /// One folder for every Profile; the parameter is kept so the pinning
+    /// bookkeeping above reads the same while the legacy pipeline lives.
     private static func folderURL(forProfile profileId: String) -> URL {
-        URL(fileURLWithPath: PhiPreferences.SaveForLater
-            .effectiveFolderPath(forProfile: profileId), isDirectory: true)
+        URL(fileURLWithPath: PhiPreferences.SaveForLater.globalFolderPath,
+            isDirectory: true)
     }
 
     /// The folder a request belongs to. A broker call names the tab it is
@@ -499,7 +513,7 @@ enum SaveForLaterService {
             .getActiveWindowState()?.profileId ?? "")
     }
 
-    private nonisolated static func libraryGate(
+    nonisolated static func libraryGate(
         _ context: ExtensionMessageContext) -> Bool {
         context.senderId == ReaderExtensionBridge.extensionId && featureEnabled
     }
@@ -518,7 +532,7 @@ enum SaveForLaterService {
         return folder.appendingPathComponent(name)
     }
 
-    private nonisolated static func libraryReply(
+    nonisolated static func libraryReply(
         _ json: String, requestId: String) {
         Task {
             await ExtensionMessaging.shared.sendResponse(
@@ -804,15 +818,37 @@ enum SaveForLaterService {
         }
     }
 
-    /// `saveForLater.reveal`: the pair in Finder.
+    private struct RevealPayload: Decodable {
+        /// The service-era form: an absolute path the library page got
+        /// from the service, checked against the registered folder.
+        let path: String?
+        /// The legacy form: a bare basename of a pair in the flat folder.
+        let basename: String?
+        let tabId: Int?
+    }
+
+    /// `saveForLater.reveal`: an item in Finder. `{ path }` is the form the
+    /// service-backed library page sends and is jailed to the registered
+    /// folder (`libraryPathURL`); `{ basename }` is the legacy page's form
+    /// and keeps the basename jail.
     nonisolated static func handleLibraryReveal(_ context: ExtensionMessageContext) {
-        guard libraryGate(context) else { return }
-        guard let payload = libraryItemPayload(context) else { return }
+        guard libraryGate(context),
+              let data = context.payload.data(using: .utf8),
+              let payload = try? JSONDecoder().decode(RevealPayload.self, from: data) else {
+            return
+        }
         Task { @MainActor in
-            guard let url = libraryFileURL(
-                      basename: payload.basename, ext: "md",
-                      folder: libraryFolder(forTab: payload.tabId)),
-                  FileManager.default.fileExists(atPath: url.path) else {
+            let url: URL?
+            if let path = payload.path {
+                url = libraryPathURL(path, folder: registeredFolderURL)
+            } else if let basename = payload.basename {
+                url = libraryFileURL(basename: basename, ext: "md",
+                                     folder: libraryFolder(forTab: payload.tabId))
+            } else {
+                url = nil
+            }
+            guard let url, FileManager.default.fileExists(atPath: url.path) else {
+                AppLogDebug("[SaveForLater] reveal refused")
                 return
             }
             NSWorkspace.shared.activateFileViewerSelecting([url])
@@ -821,7 +857,7 @@ enum SaveForLaterService {
 
     // MARK: - Toasts
 
-    private static var failedToastTitle: String {
+    static var failedToastTitle: String {
         NSLocalizedString(
             "browser.folio.failedToast",
             value: "Couldn't save this page",
@@ -873,7 +909,7 @@ enum SaveForLaterService {
 
     /// The second line of a failure toast: why, in words. An unrecognized
     /// code says nothing rather than leaking an identifier.
-    private static func toastReason(_ code: String) -> String {
+    static func toastReason(_ code: String) -> String {
         switch code {
         case "folder_unreadable":
             return NSLocalizedString(
@@ -911,7 +947,7 @@ enum SaveForLaterService {
         }
     }
 
-    private static func showToast(title: String, message: String, windowId: Int) {
+    static func showToast(title: String, message: String, windowId: Int) {
         OverlayToastCenter.shared.show(
             title: title, message: message, in: .windowId(windowId))
     }
@@ -1038,6 +1074,9 @@ enum SaveForLaterService {
         /// this item and quote.
         let noteBasename: String?
         let noteBlock: String?
+        /// Where the item lives when the service wrote it (`inbox`, a
+        /// feed or run directory); absent on the legacy flat folder.
+        let noteLocation: String?
         let tabId: Int?
     }
 
@@ -1070,6 +1109,7 @@ enum SaveForLaterService {
                     duration: 6, in: .windowId(windowId),
                     action: addNoteToastAction(basename: noteBasename,
                                                block: noteBlock,
+                                               location: payload.noteLocation,
                                                windowId: windowId,
                                                tabId: payload.tabId))
                 return

@@ -251,6 +251,7 @@ enum AuthenticatedSentinelSessionLifecycle {
             ) {
                 SentinelHelper.requestTerminationForBrowserUpdate()
             }
+            SaveForLaterService.sentinelLifecycleDidReconcile(shouldRun: false)
             return
         }
 
@@ -269,6 +270,10 @@ enum AuthenticatedSentinelSessionLifecycle {
         }
         SentinelHelper.launch()
         SentinelWatchdog.shared.start()
+        // Folio's service rides phi-agent inside the Sentinel: the same
+        // decision that launches it starts the probe that registers the
+        // Folio folder once it answers.
+        SaveForLaterService.sentinelLifecycleDidReconcile(shouldRun: true)
     }
 
     /// Stops Phi from supervising Sentinel while leaving an already running

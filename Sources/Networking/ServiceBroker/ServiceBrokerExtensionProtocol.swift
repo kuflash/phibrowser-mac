@@ -19,10 +19,15 @@ actor ServiceBrokerExtensionProtocol {
     static let allowedCanarySidecarExtensionID = "fenmfiepnpdlhplemgijlimpbebebljo"
     static let allowedCanaryLexingtonExtensionID = "pjgdkljlcbjgedgeppodjijjphfcplno"
     static let allowedCanaryKensingtonExtensionID = "pjlnhbfabokjejbhmgghmjiaknfhnima"
+    /// Mirage, for the Folio library page: the broker policy admits it to
+    /// phi-agent under `/api/folio` only. Pinned here the same way the other
+    /// three are; it must equal `ReaderExtensionBridge.extensionId`.
+    static let allowedCanaryMirageExtensionID = "ickhcgejficcoofnjnnobadfdnfbilnm"
     private static let allowedCanaryBrokerExtensionIDs = Set([
         allowedCanarySidecarExtensionID,
         allowedCanaryLexingtonExtensionID,
         allowedCanaryKensingtonExtensionID,
+        allowedCanaryMirageExtensionID,
     ])
     static let messageTypes = [
         "broker.capabilities",

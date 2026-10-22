@@ -37,6 +37,16 @@ struct PhiAgentHTTPResponse: Sendable {
     let body: Data
 }
 
+/// A response whose body arrives over time (`text/event-stream`). The head
+/// is complete when this is handed out; `body` yields raw byte slices as the
+/// upstream writes them, in no particular framing, and ends when the
+/// upstream closes. `cancel` tears the connection down early.
+struct PhiAgentHTTPStream: Sendable {
+    let statusCode: Int
+    let body: AsyncThrowingStream<Data, Error>
+    let cancel: @Sendable () -> Void
+}
+
 enum PhiAgentTransportError: Error, LocalizedError {
     /// A broker route is prescribed but there is no signed-in account to scope
     /// the socket to.
@@ -116,6 +126,33 @@ final class PhiAgentTransport: Sendable {
         }
     }
 
+    /// Opens `request` as a streaming response over the prescribed route,
+    /// with the same single re-resolve-and-retry as `send`. Only the response
+    /// head is awaited; the body is read through the returned stream, and a
+    /// body read has no per-read deadline on either route, which is what a
+    /// long-lived event stream needs.
+    func openStream(_ request: PhiAgentHTTPRequest) async throws -> PhiAgentHTTPStream {
+        let route = try await resolver.currentRoute()
+        do {
+            return try await open(request, over: route)
+        } catch let failure as RouteFailure {
+            await resolver.invalidate()
+            let retryRoute = try await resolver.currentRoute()
+            guard retryRoute != route else {
+                throw PhiAgentTransportError.unreachable(route: route, underlying: failure.underlying)
+            }
+            AppLogDebug("[PhiAgentTransport] route changed after a stream failure; retrying once")
+            do {
+                return try await open(request, over: retryRoute)
+            } catch let retryFailure as RouteFailure {
+                throw PhiAgentTransportError.unreachable(
+                    route: retryRoute,
+                    underlying: retryFailure.underlying
+                )
+            }
+        }
+    }
+
     // MARK: - Private
 
     private func perform(
@@ -130,10 +167,22 @@ final class PhiAgentTransport: Sendable {
         }
     }
 
-    private func performLoopback(
+    private func open(
+        _ request: PhiAgentHTTPRequest,
+        over route: PhiAgentRoute
+    ) async throws -> PhiAgentHTTPStream {
+        switch route {
+        case .loopback(let baseURL):
+            return try await openLoopback(request, baseURL: baseURL)
+        case .broker(let socketPath):
+            return try await openBroker(request, socketPath: socketPath)
+        }
+    }
+
+    private func loopbackRequest(
         _ request: PhiAgentHTTPRequest,
         baseURL: String
-    ) async throws -> PhiAgentHTTPResponse {
+    ) throws -> URLRequest {
         guard let url = URL(string: baseURL + request.path) else {
             throw URLError(.badURL)
         }
@@ -146,6 +195,103 @@ final class PhiAgentTransport: Sendable {
         if let timeout = request.timeout {
             urlRequest.timeoutInterval = timeout
         }
+        return urlRequest
+    }
+
+    private func openLoopback(
+        _ request: PhiAgentHTTPRequest,
+        baseURL: String
+    ) async throws -> PhiAgentHTTPStream {
+        let urlRequest = try loopbackRequest(request, baseURL: baseURL)
+        let bytes: URLSession.AsyncBytes
+        let response: URLResponse
+        do {
+            (bytes, response) = try await session.bytes(for: urlRequest)
+        } catch let error as URLError where Self.isLoopbackRouteFailure(error) {
+            AppLogDebug("[PhiAgentTransport] loopback stream failed: \(error.code.rawValue)")
+            throw RouteFailure(underlying: error)
+        }
+        guard let http = response as? HTTPURLResponse else {
+            throw PhiAgentTransportError.invalidResponse
+        }
+        // Lines are the natural slice of an event stream; the terminator is
+        // put back so the consumer sees the same bytes on both routes.
+        let body = AsyncThrowingStream<Data, Error> { continuation in
+            let reader = Task {
+                do {
+                    for try await line in bytes.lines {
+                        continuation.yield(Data((line + "\n").utf8))
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in reader.cancel() }
+        }
+        return PhiAgentHTTPStream(
+            statusCode: http.statusCode,
+            body: body,
+            cancel: { bytes.task.cancel() }
+        )
+    }
+
+    private func openBroker(
+        _ request: PhiAgentHTTPRequest,
+        socketPath: String
+    ) async throws -> PhiAgentHTTPStream {
+        let ioTimeoutMilliseconds = request.timeout
+            .map { max(1, Int($0 * 1000)) }
+            ?? ServiceBrokerClient.defaultIOTimeoutMilliseconds
+        let client = brokerClientFactory(socketPath, ioTimeoutMilliseconds)
+        let stream: BrokerHTTPStream
+        do {
+            stream = try await client.openStream(BrokerHTTPRequest(
+                service: .phiAgent,
+                path: request.path,
+                method: request.method,
+                headers: request.headers,
+                body: request.body
+            ))
+        } catch let error as ServiceBrokerHTTPError {
+            switch error {
+            case .connectionClosed, .timedOut, .peerAuthentication, .invalidResponse:
+                AppLogDebug("[PhiAgentTransport] broker stream failed: \(error)")
+                throw RouteFailure(underlying: error)
+            case .cancelled:
+                throw CancellationError()
+            case .invalidRequest, .responseTooLarge:
+                throw error
+            }
+        }
+        let body = AsyncThrowingStream<Data, Error> { continuation in
+            let reader = Task {
+                do {
+                    while let chunk = try await stream.read(maxBytes: 64 * 1024) {
+                        continuation.yield(chunk)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in
+                reader.cancel()
+                stream.cancel()
+            }
+        }
+        return PhiAgentHTTPStream(
+            statusCode: stream.response.statusCode,
+            body: body,
+            cancel: { stream.cancel() }
+        )
+    }
+
+    private func performLoopback(
+        _ request: PhiAgentHTTPRequest,
+        baseURL: String
+    ) async throws -> PhiAgentHTTPResponse {
+        let urlRequest = try loopbackRequest(request, baseURL: baseURL)
 
         let data: Data
         let response: URLResponse

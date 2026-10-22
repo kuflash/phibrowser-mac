@@ -1,7 +1,7 @@
 # Service Broker Extension Boundary
 
 Phi Browser exposes the Sentinel service broker to the packaged Sidecar,
-Lexington, and Kensington extensions through a pinned native-extension
+Lexington, Kensington and Mirage extensions through a pinned native-extension
 boundary. The browser, rather than an extension, discovers the account-scoped
 Unix domain socket and negotiates broker limits.
 
@@ -18,8 +18,11 @@ Replies use the request-scoped `sendMessageToApp` return value because the exist
 ## Trust and transport invariants
 
 - Only the exact pinned Sidecar (`fenmfiepnpdlhplemgijlimpbebebljo`),
-  Lexington (`pjgdkljlcbjgedgeppodjijjphfcplno`), and Kensington
-  (`pjlnhbfabokjejbhmgghmjiaknfhnima`) extension IDs are authorized. These IDs
+  Lexington (`pjgdkljlcbjgedgeppodjijjphfcplno`), Kensington
+  (`pjlnhbfabokjejbhmgghmjiaknfhnima`) and Mirage
+  (`ickhcgejficcoofnjnnobadfdnfbilnm`, for the Folio library page; the
+  signed policy limits it to phi-agent under `/api/folio`) extension IDs
+  are authorized. These IDs
   derive from the manifest keys shared by internal dev, Canary, and Stable
   deployment variants; the `allowedCanary...` source names are historical, not
   channel-specific identities. Standalone keyless builds, empty/debug/CDP

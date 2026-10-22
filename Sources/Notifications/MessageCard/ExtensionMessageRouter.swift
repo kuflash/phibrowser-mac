@@ -250,6 +250,13 @@ final class ExtensionMessageRouter {
             SaveForLaterService.handleLibraryReveal(context)
             return "{}"
         }
+        // The service-backed library page asks for the one thing only the
+        // app can do with an original: open it (a PDF as a tab, an EPUB
+        // through the Mac). The path is jailed to the registered folder.
+        register(type: "saveForLater.openOriginal") { context in
+            SaveForLaterService.handleOpenOriginal(context)
+            return "{}"
+        }
         // The capture RPC's report leg and the file broker's chunked write
         // path (Mirage streams MHTML archives through it).
         register(type: "saveForLater.fs.writeBegin") { context in

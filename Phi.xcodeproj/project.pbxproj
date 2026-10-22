@@ -430,6 +430,8 @@
 		ACDC00000000000000000B04 /* AppDevToolsPageSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDC00000000000000000A04 /* AppDevToolsPageSession.swift */; };
 		AE00FFFE0000000000000002 /* PhiAgentEndpointResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE00FFFE0000000000000001 /* PhiAgentEndpointResolver.swift */; };
 		AE00FFFE0000000000000004 /* PhiAgentTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE00FFFE0000000000000003 /* PhiAgentTransport.swift */; };
+		F0110000000000000000A002 /* FolioServiceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0110000000000000000A001 /* FolioServiceClient.swift */; };
+		F0110000000000000000A004 /* SaveForLaterService+Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0110000000000000000A003 /* SaveForLaterService+Service.swift */; };
 		AE5ACE000000000000000011 /* AgentSpaceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE5ACE000000000000000001 /* AgentSpaceManager.swift */; };
 		AE5ACE000000000000000012 /* AgentSpaceRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE5ACE000000000000000002 /* AgentSpaceRouter.swift */; };
 		AE5ACE000000000000000013 /* AgentSpaceOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE5ACE000000000000000003 /* AgentSpaceOverlayView.swift */; };
@@ -1267,6 +1269,8 @@
 		ACDC00000000000000000A04 /* AppDevToolsPageSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDevToolsPageSession.swift; sourceTree = "<group>"; };
 		AE00FFFE0000000000000001 /* PhiAgentEndpointResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhiAgentEndpointResolver.swift; sourceTree = "<group>"; };
 		AE00FFFE0000000000000003 /* PhiAgentTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhiAgentTransport.swift; sourceTree = "<group>"; };
+		F0110000000000000000A001 /* FolioServiceClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolioServiceClient.swift; sourceTree = "<group>"; };
+		F0110000000000000000A003 /* SaveForLaterService+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SaveForLaterService+Service.swift"; sourceTree = "<group>"; };
 		AE5ACE000000000000000001 /* AgentSpaceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSpaceManager.swift; sourceTree = "<group>"; };
 		AE5ACE000000000000000002 /* AgentSpaceRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSpaceRouter.swift; sourceTree = "<group>"; };
 		AE5ACE000000000000000003 /* AgentSpaceOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSpaceOverlayView.swift; sourceTree = "<group>"; };
@@ -1809,6 +1813,7 @@
 				EAD000000000000000000027 /* ReaderImageInliner.swift */,
 				AE00FFFE0000000000000001 /* PhiAgentEndpointResolver.swift */,
 				AE00FFFE0000000000000003 /* PhiAgentTransport.swift */,
+				F0110000000000000000A001 /* FolioServiceClient.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -3145,6 +3150,7 @@
 				EAD000000000000000000019 /* ReaderAccessibilityExtractor.swift */,
 				EAD000000000000000000025 /* ReaderExportService.swift */,
 				EAD000000000000000000037 /* SaveForLaterService.swift */,
+				F0110000000000000000A003 /* SaveForLaterService+Service.swift */,
 				EAD000000000000000000013 /* BrowserState+Reader.swift */,
 				EAD000000000000000000031 /* ReaderExtensionBridge.swift */,
 				5C4EE0000000000000000001 /* PageScreenshotService.swift */,
@@ -3971,6 +3977,7 @@
 				EAD00000000000000000001A /* ReaderAccessibilityExtractor.swift in Sources */,
 				EAD000000000000000000026 /* ReaderExportService.swift in Sources */,
 				EAD000000000000000000038 /* SaveForLaterService.swift in Sources */,
+				F0110000000000000000A004 /* SaveForLaterService+Service.swift in Sources */,
 				EAD000000000000000000014 /* BrowserState+Reader.swift in Sources */,
 				EAD000000000000000000032 /* ReaderExtensionBridge.swift in Sources */,
 				5C4EE0000000000000000002 /* PageScreenshotService.swift in Sources */,
@@ -4104,6 +4111,7 @@
 				FBD200012FD0000000000003 /* FeedbackV2.swift in Sources */,
 				AE00FFFE0000000000000002 /* PhiAgentEndpointResolver.swift in Sources */,
 				AE00FFFE0000000000000004 /* PhiAgentTransport.swift in Sources */,
+				F0110000000000000000A002 /* FolioServiceClient.swift in Sources */,
 				5B0000010000000000000001 /* ServiceBrokerTypes.swift in Sources */,
 				5B0000010000000000000002 /* ServiceBrokerSocketPath.swift in Sources */,
 				3751E249305D18AE004D82C7 /* LibraryViewModule.swift in Sources */,

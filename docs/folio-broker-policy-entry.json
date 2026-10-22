@@ -1,0 +1,11 @@
+{
+  "extension_id": "ickhcgejficcoofnjnnobadfdnfbilnm",
+  "manifest_public_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkN0YwAUBsDUMWQP7EIpBPUaH9211lqyDtMNiR6X8hk9SjHMvV3l8XE43muJLj/XbIUySsvH2quSX7+qY4b+B/8WLm6vxnp1LMhUW0zSAiRDJ3lgOmR8l6/niPmuOsTxNTb5QxcV5IrUHpFdAniDz1jmwpZsbIYnKNtK7A6kZuokdsEyE4doN5OVJSWLY7u6Y4xXaykm1pP3Sx7/THKwfhAQ17F9gqWQke6AucJgrG2eraJVuzkFHcFEpXSAtCO8HK7Ub554nBpeQkAEi8hm8eq1Hs2Tiq9isjaaLulKgj4cO4c5GDCM0KDvRuetEyVcwjOj+XNfVF0u9pyuChXTH5QIDAQAB",
+  "services": [
+    {
+      "service_id": "phi-agent",
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      "path_prefixes": ["/api/folio"]
+    }
+  ]
+}

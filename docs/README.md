@@ -28,7 +28,7 @@ contracts, failure modes and verification entry points. Start with the repositor
 ## Features and integration boundaries
 
 - [Reader integration and extraction](reader-view.md)
-- [Folio capture](folio-capture.md) and [native Folio library](folio-native-library.md)
+- [Folio capture](folio-capture.md) and [native Folio library](folio-native-library.md); the next Folio design in three layers: [storage](folio-storage.md), [backend API](folio-api.md), [UI](folio-ui.md), and its [implementation](folio-impl.md) as an HTTP service in the Sentinel driving the browser over CDP
 - [Content blocking](content-blocking.md)
 - [Site memory management](site-memory-management.md)
 - [Profile-scoped connectors](profile-scoped-connectors.md)

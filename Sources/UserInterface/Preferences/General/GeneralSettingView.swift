@@ -583,7 +583,10 @@ private struct SaveForLaterSectionView: View {
                             Text(NSLocalizedString("settings.general.folio.folderTitle", value: "Save pages to", comment: "General settings - Row title for the folder saved pages are written into"))
                                 .font(.system(size: 13))
                                 .themedForeground(.textPrimary)
-                            Text(NSLocalizedString("settings.general.folio.folderHint", value: "Each save writes a markdown article and a webpage copy side by side. Profiles can override this folder in their own settings.", comment: "General settings - Hint under the Folio folder row describing the saved file pair and the per-profile override"))
+                            Text(NSLocalizedString("settings.general.folio.folderHint", value: "Each save writes a markdown article and a webpage copy side by side. One folder holds every Profile's items.", comment: "General settings - Hint under the Folio folder row describing the saved file pair and that all Profiles share the one folder"))
+                                .font(.system(size: 11))
+                                .themedForeground(.textTertiary)
+                            Text(NSLocalizedString("settings.general.folio.signedInHint", value: "Saving pages, watching pages and following feeds need your Phi account signed in.", comment: "General settings - Hint under the Folio folder row: captures, watched pages and feeds run through the signed-in account's local agent, so they need the account signed in"))
                                 .font(.system(size: 11))
                                 .themedForeground(.textTertiary)
                         }
@@ -660,6 +663,7 @@ private struct SaveForLaterSectionView: View {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         PhiPreferences.SaveForLater.globalFolderPath = url.path
         folderPath = PhiPreferences.SaveForLater.globalFolderPath
+        SaveForLaterService.folderPreferenceDidChange()
     }
 }
 
@@ -684,7 +688,7 @@ private struct ProfileSectionView: View {
                     editInProfilesHintRow
                 }
             } else {
-                ProfileDetailSettingsView(profileId: soleProfileId, showsFolioFolder: false)
+                ProfileDetailSettingsView(profileId: soleProfileId)
             }
         }
         .onAppear {

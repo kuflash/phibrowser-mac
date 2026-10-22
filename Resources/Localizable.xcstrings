@@ -4,6 +4,126 @@
     "" : {
 
     },
+    "app.fileMenu.importIntoFolio" : {
+      "comment" : "File menu - Opens a file picker to import PDFs, EPUBs, reading-list exports or OPML files into Folio",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Import into Folio…"
+          }
+        }
+      }
+    },
+    "app.fileMenu.watchPage" : {
+      "comment" : "File menu - Saves the current page into Folio as a watched page that is re-checked for changes",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Watch This Page"
+          }
+        }
+      }
+    },
+    "browser.folio.changedToast" : {
+      "comment" : "Folio - Toast shown when a watched page's content changed since its last check; the placeholder is the saved item's name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ changed"
+          }
+        }
+      }
+    },
+    "browser.folio.importFailedToast" : {
+      "comment" : "Folio - Toast shown when a file chosen for import was refused by the Folio service; the placeholder is the file name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Couldn't import %@"
+          }
+        }
+      }
+    },
+    "browser.folio.importPanelButton" : {
+      "comment" : "Folio - Confirm button of the open panel that picks files to import into Folio",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Import"
+          }
+        }
+      }
+    },
+    "browser.folio.importPanelMessage" : {
+      "comment" : "Folio - Message of the open panel that picks files to import into Folio, naming the accepted kinds",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Choose PDFs, EPUBs, reading-list exports or OPML files to import into Folio."
+          }
+        }
+      }
+    },
+    "browser.folio.openFolioAction" : {
+      "comment" : "Folio - Button on the change toast that opens the Folio library page",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open Folio"
+          }
+        }
+      }
+    },
+    "browser.folio.savedToInboxToast" : {
+      "comment" : "Folio - Toast shown when the Folio service finished saving a page into the library's Inbox",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Saved to Inbox"
+          }
+        }
+      }
+    },
+    "browser.folio.watchingToast" : {
+      "comment" : "Folio - Toast shown when a page was put under watch so Folio re-checks it for changes; the placeholder is the page title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Watching %@"
+          }
+        }
+      }
+    },
+    "settings.general.folio.signedInHint" : {
+      "comment" : "General settings - Hint under the Folio folder row: captures, watched pages and feeds run through the signed-in account's local agent, so they need the account signed in",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Saving pages, watching pages and following feeds need your Phi account signed in."
+          }
+        }
+      }
+    },
     "・" : {
       "shouldTranslate" : false
     },
@@ -71426,7 +71546,7 @@
       }
     },
     "settings.general.folio.folderHint" : {
-      "comment" : "General settings - Hint under the Folio folder row describing the saved file pair and the per-profile override",
+      "comment" : "General settings - Hint under the Folio folder row describing the saved file pair and that all Profiles share the one folder",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
@@ -71438,7 +71558,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Each save writes a markdown article and a webpage copy side by side. Profiles can override this folder in their own settings."
+            "value" : "Each save writes a markdown article and a webpage copy side by side. One folder holds every Profile's items."
           }
         },
         "es" : {
@@ -83184,66 +83304,6 @@
         }
       }
     },
-    "settings.profiles.details.folioLabel" : {
-      "comment" : "Profiles settings - per-profile Folio destination override row label",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folio-Ordner"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Folio Folder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carpeta de Folio"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dossier Folio"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folioフォルダ"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folio 폴더"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folio-map"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folio 文件夹"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folio 檔案夾"
-          }
-        }
-      }
-    },
     "settings.profiles.details.searchEngineLabel" : {
       "comment" : "Profiles settings - search engine row label",
       "extractionState" : "extracted_with_value",
@@ -83480,246 +83540,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請為此設定檔選擇下載位置。"
-          }
-        }
-      }
-    },
-    "settings.profiles.folio.chooseButton" : {
-      "comment" : "Profiles settings - Folio folder picker confirm button",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auswählen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seleccionar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "선택"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kies"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选取"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選擇"
-          }
-        }
-      }
-    },
-    "settings.profiles.folio.clearOverrideHelp" : {
-      "comment" : "Profiles settings - help text on the control that removes this profile's Folio folder override",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Den Ordner aus den Einstellungen „Allgemein“ verwenden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Follow the General settings folder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seguir la carpeta de la configuración General"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suivre le dossier des réglages Général"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「一般」設定のフォルダに従う"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "일반 설정의 폴더 따르기"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Volg de map die bij Algemeen is ingesteld"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "跟随通用设置中的文件夹"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "依照「一般」設定中的檔案夾"
-          }
-        }
-      }
-    },
-    "settings.profiles.folio.pickerMessage" : {
-      "comment" : "Profiles settings - Folio folder picker message",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle einen Speicherort für die gesicherten Seiten dieses Profils."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose where this profile's saved pages are stored."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige dónde se almacenan las páginas guardadas de este perfil."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisissez l'emplacement de stockage des pages enregistrées de ce profil."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このプロファイルで保存したページの保存先を選択してください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 프로필의 저장된 페이지를 보관할 위치를 선택해 주세요."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kies waar de bewaarde pagina's van dit profiel worden opgeslagen."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "为此个人资料选取存储页面的位置。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "請為此設定檔選擇網頁的儲存位置。"
-          }
-        }
-      }
-    },
-    "settings.profiles.folio.sameAsGeneral" : {
-      "comment" : "Profiles settings - Folio folder shown when the profile has no override and follows the General settings folder",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wie „Allgemein“"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Same as General"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Igual que General"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Identique à Général"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「一般」と同じ"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "일반 설정과 동일"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zelfde als Algemeen"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "与通用设置相同"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "與「一般」設定相同"
           }
         }
       }

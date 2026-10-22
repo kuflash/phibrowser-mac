@@ -48,11 +48,32 @@ URL. A late event must not save the page navigated to afterwards. The native
 handler also deduplicates automatic saves by URL within its current ten-minute
 window. Keep these checks even when the extension has already filtered the event.
 
+## Service mode
+
+When the Folio service — phi-agent inside the Sentinel, serving
+`/api/folio/v1/*` — answers `GET /library`, `SaveForLaterService.serviceAvailable`
+is true and Save to Folio, Watch This Page and Import into Folio… go to it
+(`SaveForLaterService+Service.swift`, `FolioServiceClient`): `POST /capture`
+with the tab's Profile, then `GET /jobs/{id}` is polled for up to three
+minutes and the `/events` stream settles anything slower. The extension
+pipeline below is the legacy path, taken while the service is not reachable
+(signed out, AI off, Sentinel not up) and kept for one release. See
+[folio-impl.md](folio-impl.md).
+
 ## Folder and file boundary
 
-Markdown and MHTML use one shared basename in a flat folder. Native preferences
-resolve the destination from the originating Profile's override or the global
-folder. The default product folder is `~/Documents/PhiFolio`.
+Markdown and MHTML use one shared basename. There is one Folio folder for
+every Profile (`PhiPreferences.SaveForLater.globalFolderPath`); the native
+app registers it with the service (`PUT /library`) when the Sentinel is
+launched and whenever the preference changes. The default product folder is
+`~/Documents/PhiFolio`.
+
+`saveForLater.reveal { path }` and `saveForLater.openOriginal { path }` take
+an absolute path from the service-backed library page; after standardizing
+and resolving symlinks it must lie inside the registered folder, name no
+hidden component, and be a directory or a `.md`/`.mhtml`/`.pdf`/`.epub` file
+(`SaveForLaterService.libraryPathURL`). The legacy `reveal { basename }`
+form keeps the basename jail.
 
 The job pins its folder before asynchronous work. Resolving again from the
 frontmost Profile during a later callback could put the two files in different
