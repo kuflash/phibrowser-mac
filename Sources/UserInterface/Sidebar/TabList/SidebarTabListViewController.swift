@@ -4524,12 +4524,18 @@ extension SidebarTabListViewController {
         let floatingView = floatingNewTabView ?? makeFloatingNewTabView(for: item)
         floatingNewTabView = floatingView
 
-        if floatingView.superview == nil {
+        let needsAttach = floatingView.superview == nil
+        if needsAttach {
             scrollView.addFloatingSubview(floatingView, for: .vertical)
         }
 
         layoutFloatingNewTabView(floatingView, rowHeight: rowRect.height)
-        scrollView.reflectScrolledClipView(scrollView.contentView)
+        // reflectScrolledClipView forces a clip-view/layout pass. Only do it when
+        // the floating view was just attached; repeating it on every scroll frame
+        // causes excessive main-thread work with large tab counts.
+        if needsAttach {
+            scrollView.reflectScrolledClipView(scrollView.contentView)
+        }
     }
 
     private func makeFloatingNewTabView(for item: SidebarItem) -> FloatingNewTabView {
